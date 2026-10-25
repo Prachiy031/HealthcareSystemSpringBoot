@@ -26,4 +26,5 @@ public interface AppointmentRepo extends MongoRepository<Appointment, UUID>{
 	
 	/* Retrieves all appointments sorted by appointment time in ascending order*/
 	List<Appointment> findAllByOrderByAppointmentTimeAsc();
+	
 }
