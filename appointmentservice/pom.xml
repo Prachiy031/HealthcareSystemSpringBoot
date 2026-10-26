@@ -91,14 +91,7 @@
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-exporter-otlp</artifactId>
         </dependency>
-        <!-- OpenTelemetry Logback Appender -->
-        <!-- Source: https://mvnrepository.com/artifact/io.opentelemetry.instrumentation/opentelemetry-logback-appender-1.0 -->
-        <dependency>
-            <groupId>io.opentelemetry.instrumentation</groupId>
-            <artifactId>opentelemetry-logback-appender-1.0</artifactId>
-            <version>2.24.0-alpha</version>
-        </dependency>
-        
+                
         <!-- OpenTelemetry Logback Appender -->
         <!-- Source: https://mvnrepository.com/artifact/io.opentelemetry.instrumentation/opentelemetry-logback-appender-1.0 -->
         <dependency>
@@ -134,6 +127,19 @@
 			<optional>true</optional>
 		</dependency>	
 		
+		<!-- JSON Support for supporting ser/ des of various java data types which don't have inbuilt methods in objectmapper-->
+		<dependency>
+    		<groupId>com.fasterxml.jackson.datatype</groupId>
+    		<artifactId>jackson-datatype-jsr310</artifactId>
+		</dependency>
+		
+		<!-- JUnit for testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        	
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -153,6 +159,8 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+	
+	<!-- Build pulgins -->
 	<build>
 		<plugins>
 			<plugin>

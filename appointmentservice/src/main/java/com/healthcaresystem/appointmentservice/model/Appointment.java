@@ -22,7 +22,7 @@ public class Appointment {
 	
 	@Id
 	@Field(targetType = FieldType.STRING) /*Stored as string*/
-	private UUID id;   /* UUID : Universally Unique Identifier {to uniquely identify id, harder to guess}*/
+	private UUID id;   /* UUID : Universally Unique Identifier [32 hexadecimal characters separated by 4 hyphens -> it can be converted to String]{to uniquely identify id, to harder to guess it}*/
 	
 	private Patient patient;
 	private Doctor doctor;

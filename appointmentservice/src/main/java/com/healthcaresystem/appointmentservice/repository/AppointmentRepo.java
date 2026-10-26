@@ -19,7 +19,7 @@ public interface AppointmentRepo extends MongoRepository<Appointment, UUID>{
 	
 	/* Find appointments by Doctor ID, sorted as specified*/
 	
-	List<Appointment> findbyDoctorId(String doctorId, Sort sort);
+	List<Appointment> findByDoctorId(String doctorId, Sort sort);
 	
 	/* Find appointments by Patient ID, sorted as specified*/
 	List<Appointment> findByPatientId(String patientId, Sort sort);
