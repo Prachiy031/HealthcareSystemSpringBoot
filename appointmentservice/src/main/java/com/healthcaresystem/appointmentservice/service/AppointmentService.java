@@ -6,27 +6,30 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.errors.ResourceNotFoundException;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.common.record.RecordMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.healthcaresystem.appointmentservice.dto.payloadrequest.AppointmentRequest;
+import com.healthcaresystem.appointmentservice.dto.payloadresponse.GenericResponse;
+import com.healthcaresystem.appointmentservice.exception.ResourceNotFoundException;
 import com.healthcaresystem.appointmentservice.model.Appointment;
 import com.healthcaresystem.appointmentservice.model.AppointmentStatus;
 import com.healthcaresystem.appointmentservice.model.Doctor;
 import com.healthcaresystem.appointmentservice.model.Patient;
 import com.healthcaresystem.appointmentservice.repository.AppointmentRepo;
 
-import tools.jackson.databind.ObjectMapper;
 
 /* Service class to handle appointment-related business logic 
  * Manages bookings, retrieval and updating of appointments
@@ -63,13 +66,13 @@ public class AppointmentService {
     public String bookAppointment(AppointmentRequest appointment) {
     	try {
     		
-    		/* Serialize appointment object to JSON 
+    		/* To Serialize appointment object to JSON 
     		 * ObjectMapper serializes object to json and vice versa
     		 * it provides regsiterModule method which provides additional support for Java 8 data types
     		 * during ser/deser
     		 * */
     		ObjectMapper objectMapper = new ObjectMapper();
-    		objectMapper.registeredModules(new JavaTimeModule());
+    		objectMapper.registerModules(new JavaTimeModule());
     		
     		/* Fetch and validate doctor details */
     		Doctor doctor = fetchDoctorDetails(appointment.getDoctorId().toString());
@@ -90,10 +93,13 @@ public class AppointmentService {
     		newAppointment.setNotes(appointment.getNotes());
     		newAppointment.setStatus(AppointmentStatus.PENDING);
     		
+    		/* Newly created Appointement ID */
     		String appointmentId = String.valueOf(appointmentRepository.save(newAppointment).getId());
     		
+    		/* Serialize Appointment Object to JSON string for sending to Kafka */
             String appointmentJson = objectMapper.writeValueAsString(newAppointment);
             
+            /* Message sent to Kafka */
     		sendEventToKafka(appointmentJson);
     		
     		return appointmentId;
@@ -128,18 +134,24 @@ public class AppointmentService {
      * @param updated appointment details
      * */
     public String updateAppointment(AppointmentRequest appointment) {
+    	
     	try {
-    		//find existing appointment
+    		
+    		/* To Serialize Appointment object to JSON */
+    		ObjectMapper objectMapper = new ObjectMapper();
+    		objectMapper.registerModules(new JavaTimeModule());
+    		
+    		/* find existing appointment */
     		Appointment existingAppointment = appointmentRepository.findById(UUID.fromString(appointment.getId()))       //fromString -> convert UUID to string
     															   .orElseThrow(()-> new ResourceNotFoundException("Appointment Not Found with ID: " + appointment.getId()));
     		
-    		//Fetch and validate Doctor details
+    		/* Fetch and validate Doctor details */
     		Map<String, Object> doctor = restTemplate.getForObject(doctorServiceUrl + "/" + appointment.getDoctorId(), Map.class);    //Retrieve a representation by doing a GET on the mentioned URL.The response in the given format is converted and returned {class is expected} -> JSON to Expected java Object  
     		if(doctor == null || doctor.isEmpty()) {
     			throw new ResourceNotFoundException("Doctor not found with ID: "+appointment.getDoctorId());
     		}
     		
-    		//Fetch and validate Patient details
+    		/* Fetch and validate Patient details */
     		Map<String, Object> patient = restTemplate.getForObject(patientServiceUrl + "/" + appointment.getPatientId(), Map.class);    //Retrieve a representation by doing a GET on the mentioned URL.The response in the given format is converted and returned {class is expected} -> JSON to Expected java Object
     		if(patient == null || patient.isEmpty()) {
     			throw new ResourceNotFoundException("Patient not found with ID: "+appointment.getPatientId());
@@ -147,12 +159,11 @@ public class AppointmentService {
     		
     		Map<String, Object> doctorData = (Map<String, Object>) doctor.get("data"); //retrieved doctor data from response we've got from doctorResponse DTO {message and data mentioned in response}.. converted from json->object
     		
-    		/*Manual conversion can be done using Doctor DTO class directly as:
-    		 *Doctor doctor1 = restTemplate.getForObject(patientServiceUrl + "/" + appointment.getPatientId(), Doctor.class);    //Retrieve a representation by doing a GET on the mentioned URL.The response in the given format is converted and returned {class is expected} -> JSON to Expected java Object
-
-    		 * */
+    		/*Manual conversion can be done using Doctor DTO class directly as {Only if Doctor DTO and actual Doctor entity class have same structure}:
+    		 Doctor doctor1 = restTemplate.getForObject(patientServiceUrl + "/" + appointment.getPatientId(), Doctor.class);    
+    		*/
     		
-    		//Manually create Doctor Object from the map
+    		/* Manually create Doctor Object from the map */
     		Doctor doctor1 = new Doctor();
     		doctor1.setId((String) doctorData.get("id"));
     		doctor1.setFirstName((String) doctorData.get("firstName"));
@@ -165,7 +176,7 @@ public class AppointmentService {
     		
     		Map<String, Object> patientData = (Map<String, Object>) patient.get("data");
 
-            // Manually create a Patient object from the Map
+            /* Manually create a Patient object from the Map */
             Patient patient1 = new Patient();
             patient1.setId((String) patientData.get("id"));
             patient1.setFirstName((String) patientData.get("firstName"));
@@ -174,7 +185,7 @@ public class AppointmentService {
             patient1.setPhone((String) patientData.get("phone"));
             patient1.setAge((Integer) patientData.get("age"));
 
-            // Update appointment details
+            /* Update appointment details */
             existingAppointment.setDoctor(doctor1);
             existingAppointment.setPatient(patient1);
             existingAppointment.setAppointmentTime(appointment.getAppointmentTime());
@@ -182,22 +193,76 @@ public class AppointmentService {
             existingAppointment.setDoctorComments(appointment.getDoctorComments());
             existingAppointment.setStatus(AppointmentStatus.convertJsonToEnum(appointment.getStatus()));
     		
-            //Updated Appointment ID
+            /* Updated Appointment ID */
     		String idResponse = String.valueOf(appointmentRepository.save(existingAppointment).getId());
     		
-    		//Serialize Appointment object to JSON
-    		ObjectMapper objectMapper = new ObjectMapper();
-    		objectMapper.registeredModules(new JavaTimeModule());
-    		String appointmentJson = objectMapper.writeValueAsString(existingAppointment);
-    		sendEventToKafka(appointmentJson);
+    		/* Updated Version of Appointment Object into JSON String for sending to kafka */
+    		String appointmentJson = objectMapper.writeValueAsString(existingAppointment);     
+    		
+    		/* Message sent to Kafka */
+    		sendEventToKafka(appointmentJson);      
     		
     		return idResponse;
     		
     	}catch(Exception e) {
     		throw new ResourceNotFoundException("Error Updating Appointment: "+e.getMessage());
     	}
+    	
     }
-
+    
+    /* Fetches Doctor details */
+    private Doctor fetchDoctorDetails(String doctorId) {
+    	
+    	if(isDevelopmentEnvironment()) {
+    		/* Return Mock Doctor Object, as we can develop and test appointment service without doctor service {if it is not built yet} */
+    		return new Doctor(doctorId, "Ashok", "Seth" ,"ashokSethHealthCardio@gmail.com", "9080788760", "Cardiology", 10, "ACTIVE");
+    	}
+    	
+    	/* Deserialzed to Java Object */
+    	ResponseEntity<GenericResponse<Doctor>> responseEntity = restTemplate.exchange(
+    																					doctorServiceUrl +"/" + doctorId,  //URL to fetch from
+    																					HttpMethod.GET,  //Http method
+    																					null,            //requestentity
+    																					new ParameterizedTypeReference<GenericResponse<Doctor>>() {}); //responseEntity
+    	/* ParameterizedTypeReference preserves the full generic type so Spring can deserialize the response into GenericResponse<Doctor> correctly */
+    	
+    	GenericResponse<Doctor> getDoctorResponse = responseEntity.getBody(); 
+    	
+    	if(getDoctorResponse != null && getDoctorResponse.getData() != null) {
+    		return getDoctorResponse.getData();
+    	}
+    	
+    	throw new ResourceNotFoundException("Doctor not found with ID : " + doctorId);
+    	
+    }
+    
+    /* Fetches Patient details */
+    private Patient fetchPatientDetails(String patientId) {
+    	
+    	if(isDevelopmentEnvironment()) {
+    		/* Return Mock Patient Object, as we can develop and test appointment service without patient service {if it is not built yet} */
+    		return new Patient(patientId, "Ana", "Smith" ,"ana23smith@gmail.com", "9080788760", 34);
+    	}
+    	
+    	/* Deserialzed to Java Object */
+    	ResponseEntity<GenericResponse<Patient>> responseEntity = restTemplate.exchange(
+    																					patientServiceUrl +"/" + patientId,  //URL to fetch from
+    																					HttpMethod.GET,  //Http method
+    																					null,            //requestentity
+    																					new ParameterizedTypeReference<GenericResponse<Patient>>() {}); //responseEntity
+    	/* ParameterizedTypeReference preserves the full generic type so Spring can deserialize the response into GenericResponse<Doctor> correctly */
+    	
+    	GenericResponse<Patient> getPatientResponse = responseEntity.getBody(); 
+    	
+    	if(getPatientResponse != null && getPatientResponse.getData() != null) {
+    		return getPatientResponse.getData();
+    	}
+    	
+    	throw new ResourceNotFoundException("Patient not found with ID : " + patientId);
+    	
+    }
+    
+    /* Sends event to Kafka */
 	private void sendEventToKafka(String appointmentJson) {
 				
 		/* 1. Send message to kafka 
@@ -206,25 +271,33 @@ public class AppointmentService {
 		 * */
 		
 		/* sending Message to Kafka..
-		   Completable Future -> Represents a result that may become available later 
-		 * appointmentJson is getting store into topicName
-		 * */
+		   Completable Future -> Represents a result that may become available later which will complete asynchronously
+		   SendResult<String, String> -> result of sending kafka record
+		   appointmentJson is getting store into topicName
+		 */
 		CompletableFuture<SendResult<String, String>> completableFuture = kafkaTemplate.send(topicName, appointmentJson);
 		
 		/* Add callbacks to handle success and failure */
 		
 		completableFuture.whenComplete((result, exception) -> {
 			if(exception == null) {
-				//Success case
+				/* Success case */
 				RecordMetadata metadata = result.getRecordMetadata();
 				logger.info("Message sent successfully to topic : {}", topicName);
 				logger.info("Partition: {}, Offset: {}",metadata.partition(),metadata.offset());
 			}else {
-				//Failure Case
+				/* Failure Case */
 				logger.error("Failed to send message to topic: {}", topicName);
 				logger.error(exception.getMessage());
 			}
 		});
+		
+	}
+	
+	/* Checks current env is dev env or not */
+	private boolean isDevelopmentEnvironment() {
+		
+		return "dev".equalsIgnoreCase(environment);
 		
 	}
 	
