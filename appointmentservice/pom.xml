@@ -52,7 +52,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webmvc</artifactId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -143,6 +143,7 @@
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
+		<!-- 
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
@@ -150,6 +151,7 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+		-->
 			<dependency>
 				<groupId>de.codecentric</groupId>
 				<artifactId>spring-boot-admin-dependencies</artifactId>
@@ -160,7 +162,7 @@
 		</dependencies>
 	</dependencyManagement>
 	
-	<!-- Build pulgins -->
+	<!-- Build plugins -->
 	<build>
 		<plugins>
 			<plugin>

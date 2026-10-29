@@ -131,9 +131,9 @@ public class AppointmentService {
     }
     
     /* Update an existing appointment 
-     * @param updated appointment details
+     * @param updated appointment id, updated appointment details
      * */
-    public String updateAppointment(AppointmentRequest appointment) {
+    public String updateAppointment(UUID id, AppointmentRequest appointment) {
     	
     	try {
     		
@@ -142,8 +142,8 @@ public class AppointmentService {
     		objectMapper.registerModules(new JavaTimeModule());
     		
     		/* find existing appointment */
-    		Appointment existingAppointment = appointmentRepository.findById(UUID.fromString(appointment.getId()))       //fromString -> convert UUID to string
-    															   .orElseThrow(()-> new ResourceNotFoundException("Appointment Not Found with ID: " + appointment.getId()));
+    		Appointment existingAppointment = appointmentRepository.findById(id)       //fromString -> convert UUID to string
+    															   .orElseThrow(()-> new ResourceNotFoundException("Appointment Not Found with ID: " + id));
     		
     		/* Fetch and validate Doctor details */
     		Map<String, Object> doctor = restTemplate.getForObject(doctorServiceUrl + "/" + appointment.getDoctorId(), Map.class);    //Retrieve a representation by doing a GET on the mentioned URL.The response in the given format is converted and returned {class is expected} -> JSON to Expected java Object  

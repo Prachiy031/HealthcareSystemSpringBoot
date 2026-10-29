@@ -18,9 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class AppointmentRequest {
-	
-	private String id;
-	
+		
 	@NotNull(message = "Doctor ID must not be null")
 	private UUID doctorId;
 	
@@ -34,7 +32,7 @@ public class AppointmentRequest {
 	@ValidEnum(message = "Status must be valid", enumClass = AppointmentStatus.class)
 	private String status;
 	
-	@NotBlank(message = "notes must not be blank")
+	@NotBlank(message = "Notes must not be blank")
 	@Size(max = 200, message = "Notes must be 200 characters or less")
 	private String notes;
 	

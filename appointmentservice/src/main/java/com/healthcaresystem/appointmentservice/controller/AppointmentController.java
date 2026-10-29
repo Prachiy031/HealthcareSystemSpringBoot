@@ -1,6 +1,7 @@
 package com.healthcaresystem.appointmentservice.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,12 +113,12 @@ public class AppointmentController {
 	 * @param : appointmentRequest the updated appointment details
 	 * @return : response entity with updated appointment's ID 
 	 */
-	@PutMapping
-	public ResponseEntity<String> updateAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest){
+	@PutMapping("/{id}")
+	public ResponseEntity<String> updateAppointment(@PathVariable UUID id, @Valid @RequestBody AppointmentRequest appointmentRequest){
 		
 		logger.info("Updating appointment: {}", appointmentRequest);
 		try {
-			String appointmentId = appointmentService.updateAppointment(appointmentRequest);
+			String appointmentId = appointmentService.updateAppointment(id, appointmentRequest);
 			logger.info("Appointment updated successfully: {}",appointmentId);
 			return ResponseEntity.ok("Appointment updated successfully. ID: "+ appointmentId);
 		}catch(Exception e) {
