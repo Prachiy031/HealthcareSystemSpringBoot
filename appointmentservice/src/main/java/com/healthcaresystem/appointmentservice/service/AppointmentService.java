@@ -28,7 +28,7 @@ import com.healthcaresystem.appointmentservice.model.Appointment;
 import com.healthcaresystem.appointmentservice.model.AppointmentStatus;
 import com.healthcaresystem.appointmentservice.model.Doctor;
 import com.healthcaresystem.appointmentservice.model.Patient;
-import com.healthcaresystem.appointmentservice.repository.AppointmentRepo;
+import com.healthcaresystem.appointmentservice.repository.AppointmentRepository;
 
 
 /* Service class to handle appointment-related business logic 
@@ -42,7 +42,7 @@ public class AppointmentService {
 	private String environment;
 	
 	@Autowired
-	private AppointmentRepo appointmentRepository;
+	private AppointmentRepository appointmentRepository;
 	
 	@Autowired
 	private RestTemplate restTemplate;

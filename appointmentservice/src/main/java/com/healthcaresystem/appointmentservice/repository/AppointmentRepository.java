@@ -13,7 +13,7 @@ import com.healthcaresystem.appointmentservice.model.Appointment;
 /* Repository for managing appointments in the database*/
 
 @Repository
-public interface AppointmentRepo extends MongoRepository<Appointment, UUID>{
+public interface AppointmentRepository extends MongoRepository<Appointment, UUID>{
 	
 	/* Used Derived queries => based upon names queries will get generated */
 	
