@@ -41,19 +41,22 @@ public class DoctorService {
 	}
 	
 	/* Retrieve doctor by Doctor ID 
-	 * @param UUID uuid
+	 * @param uuid
 	 * @return Doctor entity
 	 * */
-	public Doctor getDoctorById(UUID uuid) throws ResourceNotFoundException{
+	public Doctor getDoctorById(String id) throws ResourceNotFoundException{
+		
+		/* Convert String representation of id to UUID type id */
+		UUID uuid = UUID.fromString(id);
 		
 		Optional<Doctor> doctor = doctorRepository.findById(uuid);
 		
 		if(doctor.isEmpty()) {
-			logger.error("Doctor not found with id: {}",uuid);
+			logger.error("Doctor not found with id: {}", id);
 			throw new ResourceNotFoundException("Doctor not found");
 		}
 		
-		logger.info("Doctor fetched successfully with id: {}", uuid);
+		logger.info("Doctor fetched successfully with id: {}", id);
 		return doctor.get();
 
 	}
@@ -114,16 +117,19 @@ public class DoctorService {
 	}
 	
 	/* Update doctor by Doctor ID 
-	 * @param UUID uuid, DoctorRequest DTO object
+	 * @param id, DoctorRequest DTO object
 	 * @return updated Doctor entity
 	 * */
-	public Doctor updateDoctorById(UUID uuid, DoctorRequest doctorRequest) throws ResourceNotFoundException{
+	public Doctor updateDoctorById(String id, DoctorRequest doctorRequest) throws ResourceNotFoundException{
+		
+		/* Convert String representation of id to UUID type id */
+		UUID uuid = UUID.fromString(id);
 		
 		Optional<Doctor> existingDoctor = doctorRepository.findById(uuid);
 		
 		if(existingDoctor.isEmpty()) {
-			logger.error("Failed to update doctor: Doctor not found with id: {}", uuid);
-			throw new ResourceNotFoundException("Doctor not found with id: " + uuid);
+			logger.error("Failed to update doctor: Doctor not found with id: {}", id);
+			throw new ResourceNotFoundException("Doctor not found with id: " + id);
 		}
 		
 		/* Get existing doctor entity */
@@ -139,7 +145,7 @@ public class DoctorService {
 		doctorToUpdate.setYearsOfExperience(doctorRequest.getYearsOfExperience());
 		doctorToUpdate.setStatus(DoctorStatus.fromJsonToEnum(doctorRequest.getStatus()));
 		
-		logger.info("Updated doctor with id {}", uuid);
+		logger.info("Updated doctor with id {}", id);
 		return doctorRepository.save(doctorToUpdate);
 		
 	}
@@ -147,7 +153,6 @@ public class DoctorService {
 	/* Delete doctor by Doctor ID 
 	 * We are just soft deleting, user might require this all information in future for report checking 
 	 * We are just deactivating the status of doctor, every other data is retained in db
-	 * 
 	 * @param UUID uuid
 	 * */
 	public void deleteDoctor(UUID uuid) throws ResourceNotFoundException{
