@@ -64,6 +64,7 @@ public class AppointmentService {
 
     /* Books a new appointment by validating doctor and patient information */
     public String bookAppointment(AppointmentRequest appointment) {
+    	
     	try {
     		
     		/* To Serialize appointment object to JSON 
@@ -118,16 +119,21 @@ public class AppointmentService {
     	* */
     	
     	return appointmentRepository.findByDoctorId(doctorId, Sort.by(Sort.Direction.ASC, "appointmentTime"));
+    	
     }
     
     /* Retrieves appointments by patient ID, sorted by appointment time in ascending order */
     public List<Appointment> getByPatientId(String patientId){
+    	
     	return appointmentRepository.findByPatientId(patientId, Sort.by(Sort.Direction.ASC, "appointmentTime"));
+    	
     }
     
     /* Retrieves all appointments, sorted by appointment time in ascending order*/
     public List<Appointment> getAllAppointments(){
+    	
     	return appointmentRepository.findAllByOrderByAppointmentTimeAsc();
+    	
     }
     
     /* Update an existing appointment 
