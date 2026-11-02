@@ -1,5 +1,6 @@
 package com.healthcaresystem.doctorservice.dto.payloadreponse;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
