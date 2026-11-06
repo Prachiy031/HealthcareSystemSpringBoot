@@ -108,7 +108,7 @@ public class DoctorServiceController {
 	 * @param Updated Doctor request dto
 	 * @return response entity of updated doctor entity as a data
 	 */
-	@PutMapping("/{id}")
+	@PutMapping("/updatedoctor/{id}")
 	public ResponseEntity<GenericResponse<Doctor>> updateDoctor(@Valid @RequestBody DoctorRequest doctorRequest, @PathVariable String id ){
 		
 		try {
@@ -125,7 +125,7 @@ public class DoctorServiceController {
 	 * @param String id
 	 * @return Response entity of generic response of string type {message}
 	 */
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/deletedoctor/{id}")
 	public ResponseEntity<GenericResponse<String>> deleteDoctor(@Valid @PathVariable String id){
 		
 		try {
