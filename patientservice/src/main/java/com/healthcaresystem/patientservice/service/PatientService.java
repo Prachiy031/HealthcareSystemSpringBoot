@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.healthcaresystem.patientservice.dto.payloadrequest.PatientRequest;
+import com.healthcaresystem.patientservice.exception.ResourceNotFoundException;
 import com.healthcaresystem.patientservice.model.Patient;
 import com.healthcaresystem.patientservice.repository.PatientRepository;
 
@@ -80,7 +81,7 @@ public class PatientService {
 	 * @param patient request DTO with details of new patient
 	 * @return Created Patient entity 
 	 */
-	public Patient addPatient(PatientRequest patientRequest) throws ResourceNotFoundException{
+	public Patient addPatient(PatientRequest patientRequest) throws Exception{
 		
 		/* Retrieve patient details with email 
 		 * Check if patient with same email already exists 
@@ -161,7 +162,7 @@ public class PatientService {
 		UUID uuid = UUID.fromString(id);
 		if(!patientRepository.existsById(uuid)) {
 			logger.error("falied to delete patient: Patient not found with id: {}", id);
-			return ResourceNotFoundException("Patient not found with Id: {}", id);
+			throw new ResourceNotFoundException("Patient not found with Id: " + id);
 		}
 		
 		/* Delete patient with uuid */
