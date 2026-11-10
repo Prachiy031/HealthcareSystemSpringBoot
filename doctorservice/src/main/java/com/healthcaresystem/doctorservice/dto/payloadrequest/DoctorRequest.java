@@ -19,11 +19,11 @@ import lombok.NoArgsConstructor;
 @Data
 public class DoctorRequest {
 	
-	@NotBlank(message = "First name must not be blank")
+	@NotBlank
 	@Size(max = 15, message = "First name must be of 15 characters or less")
 	private String firstName;
 	
-	@NotBlank(message = "Last name must not be blank")
+	@NotBlank
 	@Size(max = 15, message = "Last name must be of 15 characters or less")
 	private String lastName;
 	
@@ -34,7 +34,7 @@ public class DoctorRequest {
 	@NotBlank(message = "Phone must not be blank")
 	private String phone;
 	
-	@NotBlank(message = "Speciality must not be blank")
+	@NotBlank
 	@Size(max = 200, message = "Speciality must be of 200 characters or less")
 	private String speciality;
 	

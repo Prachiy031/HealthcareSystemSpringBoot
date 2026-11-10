@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.healthcaresystem.doctorservice.dto.payloadreponse.GenericResponse;
 import com.healthcaresystem.doctorservice.dto.payloadrequest.DoctorRequest;
+import com.healthcaresystem.doctorservice.dto.payloadresponse.GenericResponse;
 import com.healthcaresystem.doctorservice.model.Doctor;
 import com.healthcaresystem.doctorservice.service.DoctorService;
 

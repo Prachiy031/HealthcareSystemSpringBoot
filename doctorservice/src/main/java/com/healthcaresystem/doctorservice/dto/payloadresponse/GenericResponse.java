@@ -1,4 +1,4 @@
-package com.healthcaresystem.doctorservice.dto.payloadreponse;
+package com.healthcaresystem.doctorservice.dto.payloadresponse;
 
 
 import lombok.AllArgsConstructor;
