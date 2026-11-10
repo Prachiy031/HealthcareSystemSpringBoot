@@ -1,0 +1,46 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+  boot:
+    admin:
+      client:
+        enabled: false
+        instance:
+          name: Notification Service
+          service-url: ${ADMIN_CLIENT_INSTANCE_SERVICE_URL:http://127.0.0.1:8080}
+        url: ${ADMIN_CLIENT_URL:http://127.0.0.1:9080}
+        auto-registration: true
+  mail:
+    host: ${MAIL_SERVER_HOST}
+    port: ${MAIL_SERVER_PORT}
+    username: ${MAIL_SERVER_USERNAME}
+    password: ${MAIL_SERVER_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: false
+            
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+        exclude: env
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: "*"
+        liveness:
+          include: "*"
+      show-details: always  
+      
+
+server:
+  port: ${NOTIFICATION_SERVICE_PORT:8080}
+         
