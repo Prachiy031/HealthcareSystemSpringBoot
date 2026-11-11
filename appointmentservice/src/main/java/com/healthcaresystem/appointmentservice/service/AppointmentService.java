@@ -1,7 +1,6 @@
 package com.healthcaresystem.appointmentservice.service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -10,9 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -24,6 +21,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.healthcaresystem.appointmentservice.dto.payloadrequest.AppointmentRequest;
 import com.healthcaresystem.appointmentservice.dto.payloadresponse.GenericResponse;
 import com.healthcaresystem.appointmentservice.exception.ResourceNotFoundException;
+import com.healthcaresystem.appointmentservice.feignclient.DoctorServiceClient;
+import com.healthcaresystem.appointmentservice.feignclient.PatientServiceClient;
 import com.healthcaresystem.appointmentservice.model.Appointment;
 import com.healthcaresystem.appointmentservice.model.AppointmentStatus;
 import com.healthcaresystem.appointmentservice.model.Doctor;
@@ -44,9 +43,6 @@ public class AppointmentService {
 	@Autowired
 	private AppointmentRepository appointmentRepository;
 	
-	@Autowired
-	private RestTemplate restTemplate;
-	
 	@Value("${doctor.service.url}")
 	private String doctorServiceUrl;
 	
@@ -61,6 +57,14 @@ public class AppointmentService {
 	
 	/* For logging */
     private static final Logger logger = LoggerFactory.getLogger(AppointmentService.class);
+    
+    /* Feign Client for calling rest apis of doctor service into this service class  ..calling rest apis in service class */
+    @Autowired    
+    private DoctorServiceClient doctorServiceClient;
+    
+    /* Feign Client for calling rest apis of pateint service into this service class  ..calling rest apis in service class */
+    @Autowired
+    private PatientServiceClient patientServiceClient;
 
     /* Books a new appointment by validating doctor and patient information */
     public String bookAppointment(AppointmentRequest appointment) {
@@ -75,11 +79,11 @@ public class AppointmentService {
     		ObjectMapper objectMapper = new ObjectMapper();
     		objectMapper.registerModules(new JavaTimeModule());
     		
-    		/* Fetch and validate doctor details */
+    		/* Fetch and validate doctor details using feign client*/
     		Doctor doctor = fetchDoctorDetails(appointment.getDoctorId().toString());
     		logger.info("Fetched doctor details inside book appointment: {}", objectMapper.writeValueAsString(doctor)); // {} is a placeholder, slf4j replaces it with value you pass as next argument   
     		
-    		/* Fetch and validate patient's details */
+    		/* Fetch and validate patient's details using feign client*/
     		Patient patient =  fetchPatientDetails(appointment.getPatientId().toString());
     		logger.info("Fetched patient details inside book appointment: {}", objectMapper.writeValueAsString(patient)); //writeValueAsString -> serializes java obj into json 
     		
@@ -151,49 +155,22 @@ public class AppointmentService {
     		Appointment existingAppointment = appointmentRepository.findById(id)       //fromString -> convert UUID to string
     															   .orElseThrow(()-> new ResourceNotFoundException("Appointment Not Found with ID: " + id));
     		
-    		/* Fetch and validate Doctor details */
-    		Map<String, Object> doctor = restTemplate.getForObject(doctorServiceUrl + "/" + appointment.getDoctorId(), Map.class);    //Retrieve a representation by doing a GET on the mentioned URL.The response in the given format is converted and returned {class is expected} -> JSON to Expected java Object  
-    		if(doctor == null || doctor.isEmpty()) {
+    		/* Fetch and validate Doctor details - used feign client declared method inside fetchDetails method */
+        	Doctor doctor = fetchDoctorDetails(appointment.getDoctorId().toString());
+    		if(doctor == null) {
     			throw new ResourceNotFoundException("Doctor not found with ID: "+appointment.getDoctorId());
     		}
     		
-    		/* Fetch and validate Patient details */
-    		Map<String, Object> patient = restTemplate.getForObject(patientServiceUrl + "/" + appointment.getPatientId(), Map.class);    //Retrieve a representation by doing a GET on the mentioned URL.The response in the given format is converted and returned {class is expected} -> JSON to Expected java Object
-    		if(patient == null || patient.isEmpty()) {
+    		/* Fetch and validate Patient details - used feign client declared method inside fetchDetails method */
+        	Patient patient = fetchPatientDetails(appointment.getPatientId().toString());
+    		if(patient == null) {
     			throw new ResourceNotFoundException("Patient not found with ID: "+appointment.getPatientId());
     		}
-    		
-    		Map<String, Object> doctorData = (Map<String, Object>) doctor.get("data"); //retrieved doctor data from response we've got from doctorResponse DTO {message and data mentioned in response}.. converted from json->object
-    		
-    		/*Manual conversion can be done using Doctor DTO class directly as {Only if Doctor DTO and actual Doctor entity class have same structure}:
-    		 Doctor doctor1 = restTemplate.getForObject(patientServiceUrl + "/" + appointment.getPatientId(), Doctor.class);    
-    		*/
-    		
-    		/* Manually create Doctor Object from the map */
-    		Doctor doctor1 = new Doctor();
-    		doctor1.setId((String) doctorData.get("id"));
-    		doctor1.setFirstName((String) doctorData.get("firstName"));
-    		doctor1.setLastName((String) doctorData.get("lastName"));
-    		doctor1.setEmail((String) doctorData.get("email"));
-    		doctor1.setPhone((String) doctorData.get("phone"));
-    		doctor1.setSpeciality((String) doctorData.get("speciality"));
-    		doctor1.setYearsOfExperience((Integer) doctorData.get("yearsOfExperience"));
-    		doctor1.setStatus((String) doctorData.get("status"));
-    		
-    		Map<String, Object> patientData = (Map<String, Object>) patient.get("data");
 
-            /* Manually create a Patient object from the Map */
-            Patient patient1 = new Patient();
-            patient1.setId((String) patientData.get("id"));
-            patient1.setFirstName((String) patientData.get("firstName"));
-            patient1.setLastName((String) patientData.get("lastName"));
-            patient1.setEmail((String) patientData.get("email"));
-            patient1.setPhone((String) patientData.get("phone"));
-            patient1.setAge((Integer) patientData.get("age"));
 
             /* Update appointment details */
-            existingAppointment.setDoctor(doctor1);
-            existingAppointment.setPatient(patient1);
+            existingAppointment.setDoctor(doctor);
+            existingAppointment.setPatient(patient);
             existingAppointment.setAppointmentTime(appointment.getAppointmentTime());
             existingAppointment.setNotes(appointment.getNotes());
             existingAppointment.setDoctorComments(appointment.getDoctorComments());
@@ -224,18 +201,13 @@ public class AppointmentService {
     		return new Doctor(doctorId, "Ashok", "Seth" ,"ashokSethHealthCardio@gmail.com", "9080788760", "Cardiology", 10, "ACTIVE");
     	}
     	
-    	/* Deserialzed to Java Object */
-    	ResponseEntity<GenericResponse<Doctor>> responseEntity = restTemplate.exchange(
-    																					doctorServiceUrl +"/" + doctorId,  //URL to fetch from
-    																					HttpMethod.GET,  //Http method
-    																					null,            //requestentity
-    																					new ParameterizedTypeReference<GenericResponse<Doctor>>() {}); //responseEntity
-    	/* ParameterizedTypeReference preserves the full generic type so Spring can deserialize the response into GenericResponse<Doctor> correctly */
+    	/* Call Doctor service through feign client - doctorserviceclient*/
+    	ResponseEntity<GenericResponse<Doctor>> responseEntity = doctorServiceClient.getDoctorById(doctorId);
     	
-    	GenericResponse<Doctor> getDoctorResponse = responseEntity.getBody(); 
+    	GenericResponse<Doctor> doctorResponse = responseEntity.getBody();
     	
-    	if(getDoctorResponse != null && getDoctorResponse.getData() != null) {
-    		return getDoctorResponse.getData();
+    	if(doctorResponse != null && doctorResponse.getData() != null) {
+    		return doctorResponse.getData();
     	}
     	
     	throw new ResourceNotFoundException("Doctor not found with ID : " + doctorId);
@@ -250,18 +222,13 @@ public class AppointmentService {
     		return new Patient(patientId, "Ana", "Smith" ,"ana23smith@gmail.com", "9080788760", 34);
     	}
     	
-    	/* Deserialzed to Java Object */
-    	ResponseEntity<GenericResponse<Patient>> responseEntity = restTemplate.exchange(
-    																					patientServiceUrl +"/" + patientId,  //URL to fetch from
-    																					HttpMethod.GET,  //Http method
-    																					null,            //requestentity
-    																					new ParameterizedTypeReference<GenericResponse<Patient>>() {}); //responseEntity
-    	/* ParameterizedTypeReference preserves the full generic type so Spring can deserialize the response into GenericResponse<Doctor> correctly */
+    	/* call patient service using feign client- patientserviceclient*/
+    	ResponseEntity<GenericResponse<Patient>> responseEntity = patientServiceClient.getPatientById(patientId);
+       	
+    	GenericResponse<Patient> patientResponse = responseEntity.getBody(); 
     	
-    	GenericResponse<Patient> getPatientResponse = responseEntity.getBody(); 
-    	
-    	if(getPatientResponse != null && getPatientResponse.getData() != null) {
-    		return getPatientResponse.getData();
+    	if(patientResponse != null && patientResponse.getData() != null) {
+    		return patientResponse.getData();
     	}
     	
     	throw new ResourceNotFoundException("Patient not found with ID : " + patientId);

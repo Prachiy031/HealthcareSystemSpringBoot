@@ -56,7 +56,7 @@ public class DoctorServiceController {
 	 * @param string email 
 	 * @return response entity of generic response of doctor entity type as data
 	 */
-	@GetMapping("/{email}")
+	@GetMapping("/email/{email}")
 	public ResponseEntity<GenericResponse<Doctor>> getDoctorByEmail(@PathVariable String email){
 		
 		try {

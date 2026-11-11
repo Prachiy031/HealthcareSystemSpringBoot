@@ -139,11 +139,19 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        
+        <!-- Spring Cloud OpenFeign for calling one service's rest api into other service-->
+		<dependency>
+    		<groupId>org.springframework.cloud</groupId>
+    		<artifactId>spring-cloud-starter-openfeign</artifactId>
+		</dependency>
         	
 	</dependencies>
+	
+	<!-- Spring Cloud BOM special dependency management file that centralizes, synchronizes version numbers for all spring cloud projects -->
 	<dependencyManagement>
 		<dependencies>
-		<!-- 
+		
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
@@ -151,7 +159,7 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-		-->
+		
 			<dependency>
 				<groupId>de.codecentric</groupId>
 				<artifactId>spring-boot-admin-dependencies</artifactId>
