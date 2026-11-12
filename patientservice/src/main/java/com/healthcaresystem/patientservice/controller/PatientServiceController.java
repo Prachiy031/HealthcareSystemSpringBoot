@@ -75,7 +75,7 @@ public class PatientServiceController {
 	 * @param String email 
 	 * @return Response entity involving generic response of patient entity type
 	 */
-	@GetMapping("/{email}")
+	@GetMapping("/email/{email}")
 	public ResponseEntity<GenericResponse<Patient>> getPatientByEmail(@PathVariable String email){
 		
 		try {

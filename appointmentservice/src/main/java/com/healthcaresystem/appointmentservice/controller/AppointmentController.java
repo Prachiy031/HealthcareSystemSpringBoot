@@ -117,7 +117,7 @@ public class AppointmentController {
 	 * @param : appointmentRequest the updated appointment details
 	 * @return : response entity of Generic response of updated appointment's Id in string or error message for error
 	 */
-	@PutMapping("/{id}")
+	@PutMapping("updateappointment//{id}")
 	public ResponseEntity<GenericResponse<String>> updateAppointment(@PathVariable UUID id, @Valid @RequestBody AppointmentRequest appointmentRequest){
 		
 		logger.info("Updating appointment: {}", appointmentRequest);

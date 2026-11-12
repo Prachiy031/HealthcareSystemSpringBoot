@@ -17,18 +17,6 @@ spring:
   data:
     mongodb:
       uri: ${MONGO_URI:mongodb://root:rootpassword@127.0.0.1:27017/healthcare?authSource=admin}
-  kafka:
-    producer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER:127.0.0.1:9092}
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-    topic:
-      name: ${KAFKA_TOPIC:appointments}
-    ## Kafka Observation Configuration
-    listener:
-      observation-enabled: true
-    template:
-      observation-enabled: true
 
 logging:
   level:
@@ -87,8 +75,12 @@ server:
 
 doctor:
   service:
-    url: ${DOCTOR_SERVICE_URL:http://doctor-service:8080/api/v1/doctor}
+    url: ${DOCTOR_SERVICE_URL:http://doctor-service:8082/api/v1/doctor}
 
 patient:
   service:
-    url: ${PATIENT_SERVICE_URL:http://patient-service:8080/api/v1/patient}
+    url: ${PATIENT_SERVICE_URL:http://patient-service:8083/api/v1/patient}
+    
+notification:
+  service:
+    url: ${NOTIFICATION_SERVICE_URL:http://notification-service:8084/api/v1/notification}

@@ -2,9 +2,7 @@ package com.healthcaresystem.appointmentservice.service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,16 +10,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.healthcaresystem.appointmentservice.dto.payloadrequest.AppointmentRequest;
+import com.healthcaresystem.appointmentservice.dto.payloadrequest.external.NotificationRequest;
 import com.healthcaresystem.appointmentservice.dto.payloadresponse.GenericResponse;
 import com.healthcaresystem.appointmentservice.exception.ResourceNotFoundException;
 import com.healthcaresystem.appointmentservice.feignclient.DoctorServiceClient;
+import com.healthcaresystem.appointmentservice.feignclient.NotificationServiceClient;
 import com.healthcaresystem.appointmentservice.feignclient.PatientServiceClient;
 import com.healthcaresystem.appointmentservice.model.Appointment;
 import com.healthcaresystem.appointmentservice.model.AppointmentStatus;
@@ -48,10 +46,7 @@ public class AppointmentService {
 	
 	@Value("${patient.service.url}")
 	private String patientServiceUrl;
-	
-	@Autowired
-	private KafkaTemplate<String, String> kafkaTemplate;
-	
+		
 	@Value("${spring.kafka.topic.name}")
 	private String topicName;
 	
@@ -65,6 +60,16 @@ public class AppointmentService {
     /* Feign Client for calling rest apis of pateint service into this service class  ..calling rest apis in service class */
     @Autowired
     private PatientServiceClient patientServiceClient;
+    
+    /* Feign Client for calling rest apis of notification service into this service class  ..calling rest apis in service class*/
+    @Autowired
+    private NotificationServiceClient notificationServiceClient;
+    
+    /* Notification service dto */
+    @Autowired
+    private NotificationRequest notificationRequest;
+    
+    
 
     /* Books a new appointment by validating doctor and patient information */
     public String bookAppointment(AppointmentRequest appointment) {
@@ -101,11 +106,21 @@ public class AppointmentService {
     		/* Newly created Appointement ID */
     		String appointmentId = String.valueOf(appointmentRepository.save(newAppointment).getId());
     		
-    		/* Serialize Appointment Object to JSON string for sending to Kafka */
-            String appointmentJson = objectMapper.writeValueAsString(newAppointment);
-            
-            /* Message sent to Kafka */
-    		sendEventToKafka(appointmentJson);
+    		/* Create Notification request DTO */
+    		notificationRequest.setAppointmentId(UUID.fromString(appointmentId));
+    		notificationRequest.setAppointmentNotes(newAppointment.getNotes());
+    		notificationRequest.setAppointmentStatus(newAppointment.getStatus());
+    		notificationRequest.setAppointmentTime(newAppointment.getAppointmentTime());
+    		notificationRequest.setDoctorComments(newAppointment.getDoctorComments());
+    		notificationRequest.setDoctorEmail(newAppointment.getDoctor().getEmail());
+    		notificationRequest.setDoctorFirstName(newAppointment.getDoctor().getFirstName());
+    		notificationRequest.setDoctorLastName(newAppointment.getDoctor().getLastName());
+    		notificationRequest.setPatientEmail(newAppointment.getPatient().getEmail());
+    		notificationRequest.setPatientFirstName(newAppointment.getPatient().getFirstName());
+    		notificationRequest.setPatientLastName(newAppointment.getPatient().getLastName());
+    		
+    		/* Send notification using feign client interface method {Notificationserviceclient}*/
+    		notificationServiceClient.sendNotification(notificationRequest);
     		
     		return appointmentId;
     		
@@ -179,11 +194,23 @@ public class AppointmentService {
             /* Updated Appointment ID */
     		String idResponse = String.valueOf(appointmentRepository.save(existingAppointment).getId());
     		
-    		/* Updated Version of Appointment Object into JSON String for sending to kafka */
-    		String appointmentJson = objectMapper.writeValueAsString(existingAppointment);     
+
+    		/* Create Notification request DTO for updated appointment */
+    		notificationRequest.setAppointmentId(UUID.fromString(idResponse));
+    		notificationRequest.setAppointmentNotes(existingAppointment.getNotes());
+    		notificationRequest.setAppointmentStatus(existingAppointment.getStatus());
+    		notificationRequest.setAppointmentTime(existingAppointment.getAppointmentTime());
+    		notificationRequest.setDoctorComments(existingAppointment.getDoctorComments());
+    		notificationRequest.setDoctorEmail(existingAppointment.getDoctor().getEmail());
+    		notificationRequest.setDoctorFirstName(existingAppointment.getDoctor().getFirstName());
+    		notificationRequest.setDoctorLastName(existingAppointment.getDoctor().getLastName());
+    		notificationRequest.setPatientEmail(existingAppointment.getPatient().getEmail());
+    		notificationRequest.setPatientFirstName(existingAppointment.getPatient().getFirstName());
+    		notificationRequest.setPatientLastName(existingAppointment.getPatient().getLastName());
     		
-    		/* Message sent to Kafka */
-    		sendEventToKafka(appointmentJson);      
+    		/* Send notification using feign client interface method {Notificationserviceclient}*/
+    		notificationServiceClient.sendNotification(notificationRequest);
+    		   
     		
     		return idResponse;
     		
@@ -235,38 +262,6 @@ public class AppointmentService {
     	
     }
     
-    /* Sends event to Kafka */
-	private void sendEventToKafka(String appointmentJson) {
-				
-		/* 1. Send message to kafka 
-		 * 2. Send message to kafka and handle the callback
-		 * 3. Send the message to kafka and get a completableFuture
-		 * */
-		
-		/* sending Message to Kafka..
-		   Completable Future -> Represents a result that may become available later which will complete asynchronously
-		   SendResult<String, String> -> result of sending kafka record
-		   appointmentJson is getting store into topicName
-		 */
-		CompletableFuture<SendResult<String, String>> completableFuture = kafkaTemplate.send(topicName, appointmentJson);
-		
-		/* Add callbacks to handle success and failure */
-		
-		completableFuture.whenComplete((result, exception) -> {
-			if(exception == null) {
-				/* Success case */
-				RecordMetadata metadata = result.getRecordMetadata();
-				logger.info("Message sent successfully to topic : {}", topicName);
-				logger.info("Partition: {}, Offset: {}",metadata.partition(),metadata.offset());
-			}else {
-				/* Failure Case */
-				logger.error("Failed to send message to topic: {}", topicName);
-				logger.error(exception.getMessage());
-			}
-		});
-		
-	}
-	
 	/* Checks current env is dev env or not */
 	private boolean isDevelopmentEnvironment() {
 		
