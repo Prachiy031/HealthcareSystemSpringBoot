@@ -18,6 +18,13 @@ spring:
     mongodb:
       uri: ${MONGO_URI:mongodb://root:rootpassword@127.0.0.1:27017/healthcare?authSource=admin}
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/healthcare-system     
+  
+
 logging:
   level:
     org.springframework.web: DEBUG

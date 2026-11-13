@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -161,11 +160,7 @@ public class AppointmentService {
     public String updateAppointment(UUID id, AppointmentRequest appointment) {
     	
     	try {
-    		
-    		/* To Serialize Appointment object to JSON */
-    		ObjectMapper objectMapper = new ObjectMapper();
-    		objectMapper.registerModules(new JavaTimeModule());
-    		
+    		    		
     		/* find existing appointment */
     		Appointment existingAppointment = appointmentRepository.findById(id)       //fromString -> convert UUID to string
     															   .orElseThrow(()-> new ResourceNotFoundException("Appointment Not Found with ID: " + id));
