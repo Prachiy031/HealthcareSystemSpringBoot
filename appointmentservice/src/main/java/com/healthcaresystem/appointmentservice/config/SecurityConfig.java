@@ -8,11 +8,21 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
+
+/* Securing your Appointment service APIs using spring security and Keycloak JWT authentication
+ * Keycloak handles user authentication and issues JWT token 
+ * Spring Security validates those tokens and applies your authorization rules
+ */
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
 	
+	/* Convert roles accepted/understood by spring security {ROLE_ADMIN} from roles in token issued by keycloak {ADMIN} 
+	 * JwtAuthenticationConverter : inbuilt class for converting authenticated JWT into spring security JWTauthentication token
+	 * setJwtGrantedAuthoritiesConverter : inbuilt method available which accepts a converter responsible for extracting authorities from the JWT
+	 */
 	@Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter(
             KeycloakRoleConverter roleConverter)  {
@@ -25,15 +35,17 @@ public class SecurityConfig {
         return converter;
     }
 	
-	
+	/* Interface provided by spring security filter
+	 * - Represents a chain of security filters through which incoming HTTP requests pass
+	 */
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http, JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
 
         http
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf.disable())         //cross site request forgery is disabled
             .sessionManagement(session ->
-            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)    //Stateless authentication - authenticates requests using credentials supplied with each request
             		)
             .authorizeHttpRequests(auth -> auth
 
@@ -63,9 +75,9 @@ public class SecurityConfig {
             	    // All remaining endpoints require authentication
             	    .anyRequest().authenticated()
             	)
-            .oauth2ResourceServer(oauth2 ->
-            oauth2.jwt(jwt ->
-                jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)
+            .oauth2ResourceServer(oauth2 ->              /* oauth2ResourceServer: this application should accept and validate oauth2 access token */
+            oauth2.jwt(jwt ->           /* Configures jwt based authentication for resource server {Application that protects its apis using access tokens e.g. appointemnt, pateint, docytor service }*/
+                jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)  /* converts jwt issued by keycloak into spring security accepted jwt */
             )
         );
 

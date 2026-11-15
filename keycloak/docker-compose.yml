@@ -1,17 +1,23 @@
-
-services:
-  keycloak:
-    image: quay.io/keycloak/keycloak:latest
-    container_name: healthcare-keycloak
-    command: start-dev
+services:                     #defines a component docker container needs to run
+  keycloak:                   #service name
+    image: quay.io/keycloak/keycloak:latest      
+    container_name: healthcare-keycloak   #container name
+    command: start-dev       #which command docker should execute when starting keycloak
     ports:
-      - "8180:8080"
+      - "8180:8080"     #host port{local machine} : container port 
     environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-    volumes:
-      - keycloak_data:/opt/keycloak/data
-    restart: unless-stopped
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin   #initial username
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin   #initial password
+    volumes:                        #for persistent storage - even after deleting container, volume data will be stayed unless deleted explicitly
+      - keycloak_data:/opt/keycloak/data     #keycloak-data:  - volume name {persitent storage managed by docker}   /opt/keycloak/data - keycloak container{directory where keycloak stores data}
+    restart: unless-stopped    #container restart policy - container will get restart automatically unless docker stopped manually
 
-volumes:
+volumes:            #tells docker compose to create and manager the named volumes
   keycloak_data:
+
+  
+ #quoy.io -> which docker image should be used to create container 
+ #keycloak/keycloak -> keycloak image repository
+ #latest -> latest available image tag
+ 
+ 
