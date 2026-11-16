@@ -21,24 +21,31 @@ public class KeycloakRoleConverter
         implements Converter<Jwt, Collection<GrantedAuthority>> {
 
     @Override
-    public Collection<GrantedAuthority> convert(Jwt jwt) {
+    public Collection<GrantedAuthority> convert(Jwt jwt) {           /* Returns collection of granted authorities */
 
-        Map<String, Object> realmAccess =
-                jwt.getClaim("realm_access");
+        Map<String, Object> realmAccess =                        /* Extracts realm access claim from jwt */
+                jwt.getClaim("realm_access");                   /* keycloak stores realm-level roles in realm access file */
 
-        if (realmAccess == null) {
+        if (realmAccess == null) {				/* If realm access is missing in jwt */
             return Collections.emptyList();
         }
 
-        Collection<String> roles =
+        Collection<String> roles =             /* Extracts roles from roles key */
                 ((Collection<String>) realmAccess.get("roles"));
 
-        if (roles == null) {
+        if (roles == null) {                  /* If roles are missing */
             return Collections.emptyList();
         }
 
         return roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))      /* Create authority object for each role using SimpleGrantedAuthority*/
                 .collect(Collectors.toList());
+        
     }
+    
 }
+
+/* Granted authority : spring security automatically validates incoming jwt -> extracts user roles -> convert them into granted authority object -> 
+ * creates an authentication object -> stores authentication in security context -> makes it accessible through security context holder
+ */
+ 

@@ -3,3 +3,9 @@ spring:
     name: doctorservice
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}  
+  
+  security:
+    oauth2:
+      resourceserver:    #doctor service is resource server {application that protects its apis using access tokens} 
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/healthcare-system}     #identifies keycloak realm that issues your token
