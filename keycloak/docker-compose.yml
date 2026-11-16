@@ -12,12 +12,12 @@ services:                     #defines a component docker container needs to run
       - keycloak_data:/opt/keycloak/data     #keycloak-data:  - volume name {persitent storage managed by docker}   /opt/keycloak/data - keycloak container{directory where keycloak stores data}
     restart: unless-stopped    #container restart policy - container will get restart automatically unless docker stopped manually
 
-volumes:            #tells docker compose to create and manager the named volumes
+volumes:            #tells docker compose to create and manage the named volumes
   keycloak_data:
 
   
  #quoy.io -> which docker image should be used to create container 
- #keycloak/keycloak -> keycloak image repository
+ #keycloak/keycloak -> keycloak image repository name
  #latest -> latest available image tag
  
  
