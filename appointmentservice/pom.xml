@@ -68,11 +68,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
-		<dependency>
-    		<groupId>org.springframework.boot</groupId>
-    		<artifactId>spring-boot-starter-test</artifactId>
-    		<scope>test</scope>
-		</dependency>
 		
 		<!-- Micrometer Metrics -->
 		<dependency>
@@ -127,12 +122,6 @@
 			<optional>true</optional>
 		</dependency>	
 		
-		<!-- JSON Support for supporting ser/ des of various java data types which don't have inbuilt methods in objectmapper-->
-		<dependency>
-    		<groupId>com.fasterxml.jackson.datatype</groupId>
-    		<artifactId>jackson-datatype-jsr310</artifactId>
-		</dependency>
-		
 		<!-- JUnit for testing -->
         <dependency>
             <groupId>junit</groupId>
@@ -146,11 +135,20 @@
     		<artifactId>spring-cloud-starter-openfeign</artifactId>
 		</dependency>
 		
+		<!-- for authentication and authorization -->
+		<dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-test</artifactId>
+    		<scope>test</scope>
+		</dependency>
+		
 		<!-- To validate jwt access token issued by keycloak -->
 		<dependency>
     		<groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
 		</dependency>
+		
+		
         	
 	</dependencies>
 	

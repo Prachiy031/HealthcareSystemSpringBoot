@@ -48,6 +48,5 @@ public class KeycloakRoleConverter
 
 /* Granted authority : spring securiuty automatically validates incoming jwt -> extracts user roles -> convert them into granted authority object -> 
  * creates an authentication object -> stores authentication in security context -> makes it accessible through security context holder
- * 
  */
  
