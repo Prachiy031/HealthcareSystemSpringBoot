@@ -42,5 +42,5 @@ management:
       
 
 server:
-  port: ${NOTIFICATION_SERVICE_PORT:8080}
+  port: ${NOTIFICATION_SERVICE_PORT:8084}
          
