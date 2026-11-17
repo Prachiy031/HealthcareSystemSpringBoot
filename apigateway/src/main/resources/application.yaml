@@ -1,0 +1,52 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: apigateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+
+            # Doctor Service
+            - id: doctor-service             #ids created manually by us 
+              uri: ${DOCTOR_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/v1/doctor/**
+
+            # Patient Service
+            - id: patient-service              #id created manually by us
+              uri: ${PATIENT_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/v1/patient/**
+
+            # Appointment Service
+            - id: appointment-service          #id created manually by us
+              uri: ${APPOINTMENT_SERVICE_URL:http://localhost:8480}
+              predicates:
+                - Path=/api/v1/appointment/**
+
+            # Notification Service
+            - id: notification-service       #id created manually by us
+              uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8084}
+              predicates:
+                - Path=/api/v1/notifications/**
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/healthcare-system}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+  endpoint:
+    health:
+      show-details: always
