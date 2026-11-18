@@ -1,8 +1,6 @@
 package com.healthcaresystem.apigateway.config;
 
 
-package com.healthcaresystem.apigateway.config;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -14,31 +12,38 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
+/* Converter class for converting roles 
+ * issued by keycloak as ADMIN/PATIENT/DOCTOR in the form of 
+ * ROLE_ADMIN, ROLE_PATIENT,etc as expected by spring security 
+ */
 @Component
 public class KeycloakRoleConverter
         implements Converter<Jwt, Collection<GrantedAuthority>> {
 
     @Override
-    public Collection<GrantedAuthority> convert(Jwt jwt) {
+    public Collection<GrantedAuthority> convert(Jwt jwt) {			/* Returns collection of granted authorities */
 
-        Map<String, Object> realmAccess =
-                jwt.getClaim("realm_access");
+        Map<String, Object> realmAccess =				 /* Extracts realm access claim from jwt */
+                jwt.getClaim("realm_access");			/* keycloak stores realm-level roles in realmaccess.roles */
 
-        if (realmAccess == null) {
+        if (realmAccess == null) {				/* If realm access is missing in jwt */
             return Collections.emptyList();
         }
 
-        Object rolesObject = realmAccess.get("roles");
+        Object rolesObject = realmAccess.get("roles"); /*Extracts roles using roles key*/
 
-        if (!(rolesObject instanceof Collection<?> roles)) {
+        if (!(rolesObject instanceof Collection<?> roles)) {			/* If roles are missing */
             return Collections.emptyList();
         }
 
         return roles.stream()
-                .filter(String.class::isInstance)
-                .map(String.class::cast)
-                .map(role ->
-                    new SimpleGrantedAuthority("ROLE_" + role))
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))    /* Create authority object for each role using SimpleGrantedAuthority*/
                 .collect(Collectors.toList());
     }
 }
+
+
+/* Granted authority : spring security automatically validates incoming jwt -> extracts user roles -> convert them into granted authority object -> 
+ * creates an authentication object -> stores authentication in security context -> makes it accessible through security context holder
+ */
+ 

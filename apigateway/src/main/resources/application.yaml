@@ -8,32 +8,39 @@ spring:
   cloud:
     gateway:
       server:
-        webflux:
+        webmvc:
           routes:
 
             # Doctor Service
             - id: doctor-service             #ids created manually by us 
-              uri: ${DOCTOR_SERVICE_URL:http://localhost:8082}
+              uri: lb://doctor-service   #before using load balancer and eureka : it was ${DOCTOR_SERVICE_URL:http://localhost:8082} ..directly calling this service using uri
+                                        #but now calling service using registered service names directly
               predicates:
                 - Path=/api/v1/doctor/**
 
             # Patient Service
             - id: patient-service              #id created manually by us
-              uri: ${PATIENT_SERVICE_URL:http://localhost:8083}
+              uri: lb://patient-service     #before load balancer it was : ${PATIENT_SERVICE_URL:http://localhost:8083}
               predicates:
                 - Path=/api/v1/patient/**
 
             # Appointment Service
             - id: appointment-service          #id created manually by us
-              uri: ${APPOINTMENT_SERVICE_URL:http://localhost:8480}
+              uri: lb://appointment-service   #before load balancer it was : ${APPOINTMENT_SERVICE_URL:http://localhost:8480}
               predicates:
-                - Path=/api/v1/appointment/**
+                - Path=/api/v1/appointments/**
 
             # Notification Service
             - id: notification-service       #id created manually by us
-              uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8084}
+              uri: lb://notification-service  #before load balancer it was :  ${NOTIFICATION_SERVICE_URL:http://localhost:8084}
               predicates:
                 - Path=/api/v1/notifications/**
+                
+                
+  eureka:          #this service acts as eureka client and registers itself with eureka server 
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
 
   security:
     oauth2:
