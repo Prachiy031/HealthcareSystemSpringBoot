@@ -24,7 +24,7 @@ public class KeycloakRoleConverter
     public Collection<GrantedAuthority> convert(Jwt jwt) {           /* Returns collection of granted authorities */
 
         Map<String, Object> realmAccess =                        /* Extracts realm access claim from jwt */
-                jwt.getClaim("realm_access");                   /* keycloak stores realm-level roles in realm access file */
+                jwt.getClaim("realm_access");                   /* keycloak stores realm-level roles in realmaccess.roles */
 
         if (realmAccess == null) {				/* If realm access is missing in jwt */
             return Collections.emptyList();

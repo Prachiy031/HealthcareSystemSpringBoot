@@ -1,6 +1,6 @@
 spring:
   application:
-    name: doctorservice
+    name: doctor-service
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}  
   
@@ -9,3 +9,8 @@ spring:
       resourceserver:    #doctor service is resource server {application that protects its apis using access tokens} 
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/healthcare-system}     #identifies keycloak realm that issues your token
+          
+  eureka:          #this service acts as eureka client and registers itself with eureka server 
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

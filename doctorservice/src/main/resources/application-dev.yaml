@@ -8,7 +8,7 @@ spring:
         enabled: false
         instance:
           name: Doctor Service
-          service-url: ${ADMIN_CLIENT_INSTANCE_SERVICE_URL:http://127.0.0.1:8080}
+          service-url: ${ADMIN_CLIENT_INSTANCE_SERVICE_URL:http://127.0.0.1:8082}
         url: ${ADMIN_CLIENT_URL:http://127.0.0.1:9080}
         auto-registration: true
   data:
