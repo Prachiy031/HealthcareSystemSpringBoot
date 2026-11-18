@@ -9,7 +9,7 @@ spring:
         instance:
           name: Patient Service
           service-url: ${ADMIN_CLIENT_INSTANCE_SERVICE_URL:http://127.0.0.1:8083}    #address of service which is registering itself with admin server
-        url: ${ADMIN_CLIENT_URL:http://127.0.0.1:9080}            #address of admin server to which services are registering
+        url: ${ADMIN_CLIENT_URL:http://127.0.0.1:9080}            #address of admin server to which services are registering for monitoring and metrics viewing on UI
         auto-registration: true
   data:
     mongodb:
