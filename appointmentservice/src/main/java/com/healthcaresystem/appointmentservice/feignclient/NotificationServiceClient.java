@@ -12,7 +12,7 @@ import jakarta.validation.Valid;
 
 /* Feign Client interface for calling rest apis of notifictaion service into appointment service class */
 
-@FeignClient(name = "notification-service", url = "${notification.service.url}")
+@FeignClient(name = "notification-service")   //there is no requirement of mentioning uri of notification service here as appointment service will discover notification service automatically using eureka service {Name is sufficient here}
 public interface NotificationServiceClient {
 	 
 	@GetMapping("api/v1/notifications/notification-confirmation")

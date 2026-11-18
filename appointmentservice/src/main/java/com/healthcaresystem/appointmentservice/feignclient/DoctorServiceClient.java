@@ -11,7 +11,7 @@ import com.healthcaresystem.appointmentservice.model.Doctor;
 
 /* Feign Client interface : works as a HTTP client for another service, we can call rest APIS of this client interface' class into other service */
 
-@FeignClient(name = "doctor-service", url = "${doctor.service.url}")
+@FeignClient(name = "doctor-service")         //there is no requirement of mentioning uri of doctor service here as appointment service will discover doctor service automatically using eureka service {Name is sufficient here}
 public interface DoctorServiceClient {
 	
 	/* These methods should match the actual controller's methods and method signature */
