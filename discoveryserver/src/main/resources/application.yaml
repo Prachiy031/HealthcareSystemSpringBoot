@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: discoveryserver
+    
+server:
+    port: 8761
+    
+eureka:   #this is eureka server itself so this can't be client to eureka server
+  client:
+    register-with-eureka: false      #no need to register this service to eureka
+    fetch-registry: false         #no need to fetch registry where all services addresses are available {no need to fetch own registry}
+ 
+ 
+ #This is eureka server - {Service discovery which helps other services to register themselves to this}
+ #so there is no requirement of hardcoding service addresses in services which needs other services' addresses 
