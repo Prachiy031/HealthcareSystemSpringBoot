@@ -59,10 +59,10 @@
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
 		
-		<!-- For eureka server -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+		<!-- Netflix eureka server client: for client services which registers themselves with eureka service registry -->
+    	<dependency>
+    		<groupId>org.springframework.cloud</groupId>
+    		<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
 		
 		<!-- <dependency> -->
