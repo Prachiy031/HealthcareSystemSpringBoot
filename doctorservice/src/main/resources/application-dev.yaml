@@ -2,15 +2,7 @@ spring:
   cloud:
     config:
       enabled: false
-  boot:
-    admin:
-      client:
-        enabled: false
-        instance:
-          name: Doctor Service
-          service-url: ${ADMIN_CLIENT_INSTANCE_SERVICE_URL:http://127.0.0.1:8082}
-        url: ${ADMIN_CLIENT_URL:http://127.0.0.1:9080}
-        auto-registration: true
+      
   data:
     mongodb:
       uri: ${MONGO_URI:mongodb://root:rootpassword@127.0.0.1:27017/healthcare?authSource=admin}
@@ -24,17 +16,12 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
-        exclude: env
+        include: "health,info,metrics"
   endpoint:
     health:
       probes:
         enabled: true
-      group:
-        readiness:
-          include: "*"
-        liveness:
-          include: "*"
+      show-details: always
 
 server:
   port: ${DOCTOR_SERVICE_PORT:8082}
