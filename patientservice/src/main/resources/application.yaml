@@ -9,8 +9,21 @@ spring:
       resourceserver:    #Patient service is resource server {application that protects its apis using access tokens} 
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/healthcare-system}     #identifies keycloak realm that issues your token
-          
-  eureka:          #this service acts as eureka client and registers itself with eureka server 
+    
+  config:    #for vault configuration
+    import: vault://
+
+  cloud:
+    vault:
+      uri: http://127.0.0.1:8200
+      token: ${VAULT_TOKEN}
+      kv:
+        enabled: true
+        backend: secret
+        backend-version: 2
+              
+eureka:          #this service acts as eureka client and registers itself with eureka server 
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+      

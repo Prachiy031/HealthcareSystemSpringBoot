@@ -80,6 +80,12 @@
     		<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
 		
+		<!-- Vault service for storing secrets -->
+		<dependency>
+    		<groupId>org.springframework.cloud</groupId>
+    		<artifactId>spring-cloud-starter-vault-config</artifactId>
+		</dependency>
+		
 	</dependencies>
 	
 	<!-- Spring Cloud BOM special dependency management file that centralizes, synchronizes version numbers for all spring cloud projects -->

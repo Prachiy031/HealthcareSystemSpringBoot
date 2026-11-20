@@ -4,16 +4,28 @@ spring:
       enabled: false
   
   mail:
-    host: ${MAIL_SERVER_HOST}
-    port: ${MAIL_SERVER_PORT}
-    username: ${MAIL_SERVER_USERNAME}
-    password: ${MAIL_SERVER_PASSWORD}
+    host: smtp.gmail.com    #gmail's smtp host
+    port: 587      #gmail's smtp submission port using starttls
+    username: ${mail_username}
+    password: ${mail_password}
     properties:
       mail:
         smtp:
           auth: true
           starttls:
-            enable: false
+            enable: true
+            
+  config:  #for vault configuration
+    import: vault://
+
+  cloud:
+    vault:
+      uri: http://127.0.0.1:8200
+      token: ${VAULT_TOKEN}
+      kv:
+        enabled: true
+        backend: secret
+        backend-version: 2
             
 management:
   endpoints:

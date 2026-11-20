@@ -4,9 +4,22 @@ spring:
       enabled: false
       
   data:
-    mongodb:
-      uri: ${MONGO_URI:mongodb://root:rootpassword@127.0.0.1:27017/healthcare?authSource=admin}
+    mongodb:  #we are using key names stored in vault as username and passoword placeholders
+      uri:  mongodb://${mongo_username}:${mongo_password}@127.0.0.1:27017/healthcare?authSource=admin  #before usig vault it was : ${MONGO_URI:mongodb://root:rootpassword@127.0.0.1:27017/healthcare?authSource=admin}
+   
+  config:             #vault configuration
+    import: vault://
 
+  cloud:
+    vault:
+      uri: http://127.0.0.1:8200
+      token: ${VAULT_TOKEN}
+      kv:
+        enabled: true
+        backend: secret
+        backend-version: 2
+        
+        
 logging:
   level:
     org.springframework.web: DEBUG
@@ -22,6 +35,11 @@ management:
       probes:
         enabled: true
       show-details: always
+      
+
+  
 
 server:
   port: ${PATIENT_SERVICE_PORT:8083}
+  
+  

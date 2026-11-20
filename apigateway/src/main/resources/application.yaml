@@ -36,17 +36,16 @@ spring:
               predicates:
                 - Path=/api/v1/notifications/**
                 
-                
-  eureka:          #this service acts as eureka client and registers itself with eureka server 
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/healthcare-system}
+
+eureka:          #this service acts as eureka client and registers itself with eureka server 
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
 
 management:
   endpoints:
