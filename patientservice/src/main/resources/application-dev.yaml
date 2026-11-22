@@ -7,8 +7,10 @@ spring:
     mongodb:  #we are using key names stored in vault as username and passoword placeholders
       uri:  mongodb://${mongo_username}:${mongo_password}@127.0.0.1:27017/healthcare?authSource=admin  #before usig vault it was : ${MONGO_URI:mongodb://root:rootpassword@127.0.0.1:27017/healthcare?authSource=admin}
    
-  config:             #vault configuration
-    import: vault://
+  config:             
+    import: 
+      - "vault://"     #connects to vault configuration
+      - "configserver:http://localhost:8888"  #connects to configserver on github
 
   cloud:
     vault:

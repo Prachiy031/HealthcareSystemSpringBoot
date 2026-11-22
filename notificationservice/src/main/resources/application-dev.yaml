@@ -15,8 +15,10 @@ spring:
           starttls:
             enable: true
             
-  config:  #for vault configuration
-    import: vault://
+  config:             
+    import: 
+      - "vault://"     #connects to vault configuration
+      - "configserver:http://localhost:8888"  #connects to configserver on github
 
   cloud:
     vault:

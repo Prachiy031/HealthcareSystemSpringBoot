@@ -4,14 +4,16 @@ app:
 spring:
   cloud:
     config:
-      enabled: false
+      enabled: true
       
   data:
     mongodb:    #due to vault we can use key names as per stored in vault
       uri:  mongodb://${mongo_username}:${mongo_password}@127.0.0.1:27017/healthcare?authSource=admin    #before using vault it was: ${MONGO_URI:mongodb://root:rootpassword@127.0.0.1:27017/healthcare?authSource=admin}
       
-  config:             #for vault configuration
-    import: vault://
+  config:             
+    import: 
+      - "vault://"     #connects to vault configuration
+      - "configserver:http://localhost:8888"  #connects to configserver on github
 
   cloud:
     vault:
