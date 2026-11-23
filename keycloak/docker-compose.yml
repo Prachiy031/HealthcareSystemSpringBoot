@@ -6,8 +6,8 @@ services:                     #defines a component docker container needs to run
     ports:
       - "8180:8080"     #host port{local machine} : container port 
     environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin   #initial username
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin   #initial password
+      KC_BOOTSTRAP_ADMIN_USERNAME:  ${KEYCLOAK_ADMIN_USERNAME}  #stored in vault
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_USERNAME}   #stored in vault
     volumes:                        #for persistent storage - even after deleting container, volume data will be stayed unless deleted explicitly
       - keycloak_data:/opt/keycloak/data     #keycloak-data:  - volume name {persitent storage managed by docker}   /opt/keycloak/data - keycloak container{directory where keycloak stores data}
     restart: unless-stopped    #container restart policy - container will get restart automatically unless docker stopped manually
