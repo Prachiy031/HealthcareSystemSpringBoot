@@ -2,9 +2,6 @@ app:
   environment: dev
 
 spring:
-  cloud:
-    config:
-      enabled: true
       
   data:
     mongodb:    #due to vault we can use key names as per stored in vault

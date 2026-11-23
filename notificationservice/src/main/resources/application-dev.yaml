@@ -1,7 +1,4 @@
 spring:
-  cloud:
-    config:
-      enabled: false
   
   mail:
     host: smtp.gmail.com    #gmail's smtp host

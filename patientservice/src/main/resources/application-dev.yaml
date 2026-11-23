@@ -1,7 +1,4 @@
 spring:
-  cloud:
-    config:
-      enabled: false
       
   data:
     mongodb:  #we are using key names stored in vault as username and passoword placeholders
@@ -21,7 +18,6 @@ spring:
         backend: secret
         backend-version: 2
         
-        
 logging:
   level:
     org.springframework.web: DEBUG
@@ -37,9 +33,6 @@ management:
       probes:
         enabled: true
       show-details: always
-      
-
-  
 
 server:
   port: ${PATIENT_SERVICE_PORT:8083}
